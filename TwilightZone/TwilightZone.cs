@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -22,8 +23,10 @@ namespace TwilightZone
         private Texture2D background;
         private Texture2D spaceship;
         private Texture2D laser1;
-        private Texture2D metal;
         private Texture2D asteroid;
+
+        //Sounds
+        private SoundEffect pewpew;
         
         //Objects
         Ship playerShip = new Ship();
@@ -79,8 +82,9 @@ namespace TwilightZone
             background = Content.Load<Texture2D>("starry_background");
             spaceship = Content.Load<Texture2D>("ship_1");
             laser1 = Content.Load<Texture2D>("laser_1");
-            metal = Content.Load<Texture2D>("metal_tile");
             asteroid = Content.Load<Texture2D>("asteroid");
+
+            pewpew = Content.Load<SoundEffect>("pewpew");
         }
 
         /// <summary>
@@ -122,6 +126,7 @@ namespace TwilightZone
                     Point laserPosition = new Point(playerShip.currentPosition.X + 20, playerShip.currentPosition.Y + 5);
                     laserList.Add(new Laser(laserPosition));
                     timeSinceLastLaser = 0;
+                    pewpew.Play();
                 }
             }
 

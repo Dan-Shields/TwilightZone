@@ -18,7 +18,7 @@ namespace TwilightZone
 
         public Ship()
         {
-            currentPosition = new Point(TwilightZone.virtualWidth /2, TwilightZone.virtualHeight - 70);
+            currentPosition = new Point(TwilightZone.virtualWidth /2 - 25, TwilightZone.virtualHeight - 70);
             health = 100;
         }
 

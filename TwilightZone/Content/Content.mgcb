@@ -73,3 +73,9 @@
 /processorParam:TextureFormat=Color
 /build:asteroid.png
 
+#begin pewpew.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:pewpew.wav
+
