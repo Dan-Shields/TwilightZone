@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.9
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Twilight Zone", "TwilightZone\Twilight Zone.csproj", "{F9B132A5-B6A9-4CEE-9E21-19866EC05A02}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F9B132A5-B6A9-4CEE-9E21-19866EC05A02}.Debug|x86.ActiveCfg = Debug|x86
+		{F9B132A5-B6A9-4CEE-9E21-19866EC05A02}.Debug|x86.Build.0 = Debug|x86
+		{F9B132A5-B6A9-4CEE-9E21-19866EC05A02}.Release|x86.ActiveCfg = Release|x86
+		{F9B132A5-B6A9-4CEE-9E21-19866EC05A02}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
