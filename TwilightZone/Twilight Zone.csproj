@@ -42,6 +42,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Asteroid.cs" />
+    <Compile Include="Background.cs" />
     <Compile Include="Laser.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Ship.cs" />

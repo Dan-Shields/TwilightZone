@@ -12,17 +12,19 @@ namespace TwilightZone
     {
         public Point currentPosition { get; private set; }
         public int health { get; private set; }
+        public Rectangle hitbox { get; private set; }
+        private int timeSinceDamage = 60;
 
         private int speed = 4;
-
 
         public Ship()
         {
             currentPosition = new Point(TwilightZone.virtualWidth /2 - 25, TwilightZone.virtualHeight - 70);
             health = 100;
+            hitbox = new Rectangle(currentPosition.X, currentPosition.Y, 50, 50);
         }
 
-        public void UpdatePosition(KeyboardState keyboardState)
+        public void Update(KeyboardState keyboardState)
         {
             string upState = Convert.ToInt16(keyboardState.IsKeyDown(Keys.Up)).ToString();
             string downState = Convert.ToInt16(keyboardState.IsKeyDown(Keys.Down)).ToString();
@@ -82,11 +84,20 @@ namespace TwilightZone
             {
                 currentPosition = new Point(currentPosition.X, 0);
             }
+
+            hitbox = new Rectangle(currentPosition.X, currentPosition.Y, 50, 50);
+
+            timeSinceDamage++;
         }
 
         public void SustainDamage(int damage)
         {
-            health -= damage;
+            if (timeSinceDamage > 60)
+            {
+                health -= damage;
+                timeSinceDamage = 0;
+            }
+            
 
             //TODO: add a flash or something
         }

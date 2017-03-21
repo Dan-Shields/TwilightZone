@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
@@ -24,7 +25,7 @@ namespace TwilightZone
         private Texture2D spaceship;
         private Texture2D laser1;
         private Texture2D asteroid;
-
+        
         //Sounds
         private SoundEffect pewpew;
         
@@ -108,17 +109,22 @@ namespace TwilightZone
 
             KeyboardState keyboardState = Keyboard.GetState();
 
-            playerShip.UpdatePosition(keyboardState);
+            playerShip.Update(keyboardState);
             
             timeSinceLastLaser++;
 
             //Update position of all current laser objects
             foreach (Laser laserObj in laserList)
             {
-                laserObj.Tick();
+                laserObj.Update();
+
+                //laser cleanup
+                var item = laserList.SingleOrDefault(x => x.currentPosition.X < -1 * x.hitbox.Height);
+                if (item != null)
+                    laserList.Remove(item);
             }
 
-            //Create new laser if LMB is pressed
+            //Create new laser if space is pressed
             if (keyboardState.IsKeyDown(Keys.Space))
             {
                 if (timeSinceLastLaser > 8)
@@ -134,14 +140,29 @@ namespace TwilightZone
 
             foreach (Asteroid asteroidObj in asteroidList)
             {
-                asteroidObj.Tick();
+                asteroidObj.Update();
+
+                //asteroid cleanup
+                var item = asteroidList.SingleOrDefault(x => x.currentPosition.X > screenHeight);
+                if(item != null)
+                    asteroidList.Remove(item);
+
+                //Test for collision with player
+                if (asteroidObj.hitbox.Intersects(playerShip.hitbox))
+                {
+                    playerShip.SustainDamage(10);
+                }
+
+                var test = laserList.SingleOrDefault(x => x.hitbox.Intersects(asteroidObj.hitbox));
+                if (test != null)
+                    laserList.Remove(test);
             }
 
-            //Create new laser if LMB is pressed
+            //Create new asteroids
             if (random.Next(0, 100) == 1)
             { 
-                Point asteroidPosition = new Point(random.Next(350, virtualWidth - 400), -50);
-                asteroidList.Add(new Asteroid(asteroidPosition));
+                Point newAsteroidPosition = new Point(random.Next(350, virtualWidth - 400), -50);
+                asteroidList.Add(new Asteroid(newAsteroidPosition, random.Next(20, 60)));
                 timeSinceLastAsteroid = 0;
             }
             
@@ -178,20 +199,33 @@ namespace TwilightZone
                 background.Width * columns,
                 background.Height * rows);
 
-
+            //draw background
             spriteBatch.Draw(background, new Rectangle(350, 0, virtualWidth - 700, virtualHeight), backgroundReadRectangle, Color.White);
 
+            //draw all lasers
             foreach (Laser laserObj in laserList)
             {
-                spriteBatch.Draw(laser1, new Rectangle(laserObj.currentPosition.X, laserObj.currentPosition.Y, 10,15), Color.White);
+                spriteBatch.Draw(laser1, laserObj.hitbox, Color.White);
             }
 
+            //draw all asteroids
             foreach (Asteroid asteroidObj in asteroidList)
             {
-                spriteBatch.Draw(asteroid, new Rectangle(asteroidObj.currentPosition.X, asteroidObj.currentPosition.Y, 50, 50), Color.White);
+                spriteBatch.Draw(asteroid, asteroidObj.hitbox, Color.White);
             }
 
-            spriteBatch.Draw(spaceship, new Rectangle(playerShip.currentPosition.X, playerShip.currentPosition.Y, 50, 50), Color.White);
+            //draw ship
+            spriteBatch.Draw(spaceship, playerShip.hitbox, Color.White);
+
+            //draw health bar
+            //spriteBatch.Draw();
+            Texture2D healthBar = new Texture2D(graphics.GraphicsDevice, playerShip.health + 1, 20);
+            Color[] data = new Color[(playerShip.health + 1) * 20];
+            for (int i = 0; i < data.Length; ++i) data[i] = Color.Red;
+            healthBar.SetData(data);
+
+            Vector2 coor = new Vector2(40, virtualHeight - 40);
+            spriteBatch.Draw(healthBar, coor, Color.White);
 
             spriteBatch.End();
 
