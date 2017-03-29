@@ -13,9 +13,9 @@ namespace TwilightZone
         public Point currentPosition { get; private set; }
         public int health { get; private set; }
         public Rectangle hitbox { get; private set; }
-        private int timeSinceDamage = 60;
+        public int timeSinceDamage { get; private set; } = 60;
 
-        private int speed = 4;
+    private const int Speed = 4;
 
         public Ship()
         {
@@ -37,19 +37,19 @@ namespace TwilightZone
                 //Axial direction
                 case "1000":
                 case "1011":
-                    currentPosition = new Point(currentPosition.X, currentPosition.Y - speed);
+                    currentPosition = new Point(currentPosition.X, currentPosition.Y - Speed);
                     break;
                 case "0100":
                 case "0111":
-                    currentPosition = new Point(currentPosition.X, currentPosition.Y + speed);
+                    currentPosition = new Point(currentPosition.X, currentPosition.Y + Speed);
                     break;
                 case "0010":
                 case "1110":
-                    currentPosition = new Point(currentPosition.X - speed, currentPosition.Y);
+                    currentPosition = new Point(currentPosition.X - Speed, currentPosition.Y);
                     break;
                 case "0001":
                 case "1101":
-                    currentPosition = new Point(currentPosition.X + speed, currentPosition.Y);
+                    currentPosition = new Point(currentPosition.X + Speed, currentPosition.Y);
                     break;
 
                 //Diagonal direction
@@ -92,14 +92,9 @@ namespace TwilightZone
 
         public void SustainDamage(int damage)
         {
-            if (timeSinceDamage > 60)
-            {
-                health -= damage;
-                timeSinceDamage = 0;
-            }
-            
-
-            //TODO: add a flash or something
+            if (timeSinceDamage <= 60) return;
+            health -= damage;
+            timeSinceDamage = 0;
         }
 
     }

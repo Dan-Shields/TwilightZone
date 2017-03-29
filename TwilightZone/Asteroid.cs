@@ -10,22 +10,22 @@ namespace TwilightZone
     class Asteroid
     {
         public Point currentPosition { get; private set; }
-        public Rectangle hitbox { get; private set; }
-        public int asteroidSize { get; private set; }
+        public Circle hitbox { get; private set; }
+        public int asteroidSize { get; }
 
-        private int speed = 2;
+        private const int Speed = 2;
 
         public Asteroid(Point startingPoint, int size)
         {
             currentPosition = startingPoint;
             asteroidSize = size;
-            hitbox = new Rectangle(currentPosition.X, currentPosition.Y, size, size);
+            hitbox = new Circle(currentPosition.X, currentPosition.Y, asteroidSize);
         }
 
         public void Update()
         {
-            currentPosition = new Point(currentPosition.X, currentPosition.Y + speed);
-            hitbox = new Rectangle(currentPosition.X, currentPosition.Y, asteroidSize, asteroidSize);
+            currentPosition = new Point(currentPosition.X, currentPosition.Y + Speed);
+            hitbox = new Circle(currentPosition.X, currentPosition.Y, asteroidSize);
         }
     }
 }

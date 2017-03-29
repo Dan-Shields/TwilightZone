@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -14,11 +13,11 @@ namespace TwilightZone
     /// </summary>
     public class TwilightZone : Game
     {
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        private GraphicsDeviceManager graphics;
+        private SpriteBatch spriteBatch;
 
         //Settings file name
-        protected const string SETTINGS_FILE = "settings.txt";
+        protected const string SettingsFile = "settings.txt";
 
         // Textures
         private Texture2D background;
@@ -30,12 +29,13 @@ namespace TwilightZone
         private SoundEffect pewpew;
         
         //Objects
-        Ship playerShip = new Ship();
+        Background backgroundObj = new Background();
+        Ship shipObj = new Ship();
         List<Laser> laserList = new List<Laser>();
         List<Asteroid> asteroidList = new List<Asteroid>();
 
         //general class properties
-        private int timeSinceLastLaser = 0;
+        private int timeSinceLastLaser = 8;
         private int timeSinceLastAsteroid = 360;
         public static int screenWidth;
         public static int screenHeight;
@@ -109,7 +109,7 @@ namespace TwilightZone
 
             KeyboardState keyboardState = Keyboard.GetState();
 
-            playerShip.Update(keyboardState);
+            shipObj.Update(keyboardState);
             
             timeSinceLastLaser++;
 
@@ -122,14 +122,15 @@ namespace TwilightZone
                 var item = laserList.SingleOrDefault(x => x.currentPosition.X < -1 * x.hitbox.Height);
                 if (item != null)
                     laserList.Remove(item);
+                
             }
 
             //Create new laser if space is pressed
-            if (keyboardState.IsKeyDown(Keys.Space))
+            if (keyboardState.IsKeyDown(Keys.Space) && shipObj.timeSinceDamage > 60)
             {
                 if (timeSinceLastLaser > 8)
                 {
-                    Point laserPosition = new Point(playerShip.currentPosition.X + 20, playerShip.currentPosition.Y + 5);
+                    Point laserPosition = new Point(shipObj.currentPosition.X + 20, shipObj.currentPosition.Y + 5);
                     laserList.Add(new Laser(laserPosition));
                     timeSinceLastLaser = 0;
                     pewpew.Play();
@@ -144,25 +145,29 @@ namespace TwilightZone
 
                 //asteroid cleanup
                 var item = asteroidList.SingleOrDefault(x => x.currentPosition.X > screenHeight);
-                if(item != null)
+                if (item != null)
                     asteroidList.Remove(item);
 
                 //Test for collision with player
-                if (asteroidObj.hitbox.Intersects(playerShip.hitbox))
+                if (asteroidObj.hitbox.Intersects(shipObj.hitbox))
                 {
-                    playerShip.SustainDamage(10);
+                    shipObj.SustainDamage(10);
                 }
 
-                var test = laserList.SingleOrDefault(x => x.hitbox.Intersects(asteroidObj.hitbox));
-                if (test != null)
-                    laserList.Remove(test);
+                for (var i = 0; i < laserList.Count(); i++)
+                {
+                    var test = laserList.SingleOrDefault(x => asteroidObj.hitbox.Intersects(x.hitbox));
+                    if (test != null)
+                        laserList.Remove(test);
+                }
+                
             }
 
             //Create new asteroids
-            if (random.Next(0, 100) == 1)
+            if (random.Next(0, 100) == 1 && timeSinceLastAsteroid > 360)
             { 
                 Point newAsteroidPosition = new Point(random.Next(350, virtualWidth - 400), -50);
-                asteroidList.Add(new Asteroid(newAsteroidPosition, random.Next(20, 60)));
+                asteroidList.Add(new Asteroid(newAsteroidPosition, random.Next(20, 50)));
                 timeSinceLastAsteroid = 0;
             }
             
@@ -182,25 +187,10 @@ namespace TwilightZone
             var matrix = Matrix.CreateScale(scaleX, scaleY, 1.0f);
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.LinearWrap, transformMatrix: matrix);
-            const int rows = 3;
-            const int columns = 2;
-
-            //make this once per frame
-
-            //frametimer == 1 when our game runs at 60 hz
-            float frametimer = (float)(gameTime.TotalGameTime.TotalMilliseconds * 60 / 1000);
-
-            const float scrollDirectionY = -2;
-
-            int starty = (int)(scrollDirectionY * frametimer);
-
-            Rectangle backgroundReadRectangle = new Rectangle(0,
-                starty,
-                background.Width * columns,
-                background.Height * rows);
+            
 
             //draw background
-            spriteBatch.Draw(background, new Rectangle(350, 0, virtualWidth - 700, virtualHeight), backgroundReadRectangle, Color.White);
+            spriteBatch.Draw(background, new Rectangle(350, 0, virtualWidth - 700, virtualHeight), backgroundObj.ReadRectangle(background, gameTime), Color.White);
 
             //draw all lasers
             foreach (Laser laserObj in laserList)
@@ -211,16 +201,26 @@ namespace TwilightZone
             //draw all asteroids
             foreach (Asteroid asteroidObj in asteroidList)
             {
-                spriteBatch.Draw(asteroid, asteroidObj.hitbox, Color.White);
+                spriteBatch.Draw(asteroid, new Rectangle(asteroidObj.hitbox.X - (asteroidObj.asteroidSize/2), asteroidObj.hitbox.Y - (asteroidObj.asteroidSize / 2), asteroidObj.hitbox.Radius * 2, asteroidObj.hitbox.Radius * 2), Color.White);
             }
 
             //draw ship
-            spriteBatch.Draw(spaceship, playerShip.hitbox, Color.White);
+            Color maskColor;
+            if (shipObj.timeSinceDamage < 60 && (shipObj.timeSinceDamage / 10) % 2 == 0)
+            {
+                maskColor = Color.Red;
+            }
+            else
+            {
+                maskColor = Color.White;
+            }
+            
+            spriteBatch.Draw(spaceship, shipObj.hitbox, maskColor);
 
             //draw health bar
             //spriteBatch.Draw();
-            Texture2D healthBar = new Texture2D(graphics.GraphicsDevice, playerShip.health + 1, 20);
-            Color[] data = new Color[(playerShip.health + 1) * 20];
+            Texture2D healthBar = new Texture2D(graphics.GraphicsDevice, shipObj.health + 1, 20);
+            Color[] data = new Color[(shipObj.health + 1) * 20];
             for (int i = 0; i < data.Length; ++i) data[i] = Color.Red;
             healthBar.SetData(data);
 
@@ -231,5 +231,38 @@ namespace TwilightZone
 
             base.Draw(gameTime);
         }
+
+        Texture2D createCircleText(int radius)
+        {
+            Texture2D texture = new Texture2D(GraphicsDevice, radius, radius);
+            Color[] colorData = new Color[radius * radius];
+
+            float diam = radius / 2f;
+            float diamsq = diam * diam;
+
+            for (int x = 0; x < radius; x++)
+            {
+                for (int y = 0; y < radius; y++)
+                {
+                    int index = x * radius + y;
+                    Vector2 pos = new Vector2(x - diam, y - diam);
+                    if (pos.LengthSquared() <= diamsq)
+                    {
+                        colorData[index] = Color.White;
+                    }
+                    else
+                    {
+                        colorData[index] = Color.Transparent;
+                    }
+                }
+            }
+
+            texture.SetData(colorData);
+            return texture;
+        }
     }
+
+
+
+
 }

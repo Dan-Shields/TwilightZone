@@ -12,7 +12,7 @@ namespace TwilightZone
         public Point currentPosition { get; private set; }
         public Rectangle hitbox { get; private set; }
 
-        private int speed = 5;
+        private const int Speed = 5;
 
         public Laser(Point startingPoint)
         {
@@ -22,13 +22,8 @@ namespace TwilightZone
 
         public void Update()
         {
-            currentPosition = new Point(currentPosition.X, currentPosition.Y - speed);
+            currentPosition = new Point(currentPosition.X, currentPosition.Y - Speed);
             hitbox = new Rectangle(currentPosition.X, currentPosition.Y, 10, 15);
-        }
-
-        public void TestCollision()
-        {
-
         }
     }
 }
